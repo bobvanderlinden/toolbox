@@ -131,6 +131,30 @@ blocks:
           - sem-version scala 2.11
           - sem-version scala 2.12
 
+  - name: Run tests in Semaphoreci toolbox Docker container
+    task:
+      agent:
+          machine:
+            type: e1-standard-2
+          containers:
+            - name: main
+              image: semaphoreci/toolbox-tests:latest
+      jobs:
+      - name: Test Docker Image no-sudo install
+        commands:
+          - checkout
+          - cd ../
+          - rm -rf .toolbox/
+          - mv toolbox/ .toolbox
+          - bash .toolbox/install-toolbox
+          - source .toolbox/toolbox
+          - cd .toolbox
+          - git submodule init && git submodule update
+          - ./tests/support/bats-core/install.sh /usr/local
+          - bats tests/cache.bats
+          - bats tests/libcheckout.bats
+
+
   - name: Run tests in MacOS env
     task:
       agent:
